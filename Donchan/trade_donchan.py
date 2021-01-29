@@ -16,14 +16,14 @@ stopLoss = 0.95
 rikaku_day = 80
 
 # chek the highest price in the past {term} times
-df['Highest'+str(shortTerm)] = df.iloc[:, 1].rolling(window=shortTerm).max()
+df['Highest'+str(shortTerm)] = df.iloc[:, 5].rolling(window=shortTerm).max()
 # chek the highest price in the past {term} times
-df['Lowest'+str(shortTerm)] = df.iloc[:, 2].rolling(window=shortTerm).min()
+df['Lowest'+str(shortTerm)] = df.iloc[:, 5].rolling(window=shortTerm).min()
 
 # chek the highest price in the past {term} times
-df['Highest'+str(longTerm)] = df.iloc[:, 1].rolling(window=longTerm).max()
+df['Highest'+str(longTerm)] = df.iloc[:, 5].rolling(window=longTerm).max()
 # chek the highest price in the past {term} times
-df['Lowest'+str(longTerm)] = df.iloc[:, 2].rolling(window=longTerm).min()
+df['Lowest'+str(longTerm)] = df.iloc[:, 5].rolling(window=longTerm).min()
 
 # judge U trend or Down trend by DC
 buy_position = False # 1 means entered and 0 means not already entered
@@ -36,6 +36,7 @@ counter = 0
 percentChange = []
 
 for i in range(1, len(df)):
+
     shortHighest = df['Highest'+str(shortTerm)][i-1]
     shortLowest = df['Lowest'+str(shortTerm)][i-1]
     longHighest = df['Highest'+str(longTerm)][i-1]
@@ -47,30 +48,28 @@ for i in range(1, len(df)):
     # avoid NaN data 
     # 買いトレンド
     if (np.isnan(longHighest)) == False:
-        if (close > longHighest):
+        if (close > longHighest and buy_position == False):
             print('Up trend')
-            if (buy_position == False):
-                buy_position = True
-                buy_price = close
-                buy_stopLine = close * stopLoss
-                print('Buy at the price {}'.format(buy_price))
+            buy_position = True
+            buy_price = close
+            buy_stopLine = close * stopLoss
+            print('Buy at the price {}'.format(buy_price))
     
     # 売りトレンド
     if (np.isnan(longLowest)) == False:
-        if (close < longLowest):
+        if (close < longLowest and sell_position == False):
             print('Down trend')
-            if (sell_position == False):
-                sell_position = True
-                sell_price = close
-                sell_stopLine = close * stopLoss
-                print('Sell at the price {}'.format(sell_price))
+            sell_position = True
+            sell_price = close
+            sell_stopLine = close * stopLoss
+            print('Sell at the price {}'.format(sell_price))
 
     # 損切り
-    if buy_position == True and close < buy_position*stopLoss:
+    if buy_position == True and close < buy_price*stopLoss:
         buy_position = False
         percent = (close/buy_price - 1) * 100
         percentChange.append(percent)
-    if sell_position == True and close > sell_position*stopLoss:
+    if sell_position == True and close > (sell_price + sell_price*(1-stopLoss)):
         sell_position = False
         percent = (sell_price/close - 1) * 100
         percentChange.append(percent)
