@@ -7,7 +7,7 @@ import mplfinance as mpf
 
 start = '2016-01-01'
 end = dt.datetime.now()
-stock_code = 'AMD'
+stock_code = '^CSPC'
 df = yf.download(stock_code, start, end, interval='1d')
 print(df.head())
 shortTerm = 20
